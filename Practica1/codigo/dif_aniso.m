@@ -35,7 +35,6 @@
 
 function imdif = dif_aniso(im, niter, k, lambda, opcion)
 
-
 im = double(im);
 [rows,cols] = size(im);
 imdif = im;

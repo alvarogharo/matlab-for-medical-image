@@ -4,6 +4,8 @@ im1 = rgb2gray(im1);
 im2 = imread('images/T2.tif');
 im2 = rgb2gray(im2);
 
+%% Good approach
+
 dif1 = dif_aniso(im1, 30, 8, 0.2, 1);
 dif2 = dif_aniso(im2, 30, 8, 0.2, 1);
 
@@ -35,8 +37,8 @@ dif2 = dif_aniso(im2, 30, 8, 0.4, 1);
 %Increasing lambda creates checkboard noise pattern on the image
 
 %% Function variation
-dif1 = dif_aniso(im1, 30, 8, 0.2, 1);
-dif2 = dif_aniso(im2, 30, 8, 0.2, 1);
+dif1 = dif_aniso(im1, 30, 8, 0.2, 2);
+dif2 = dif_aniso(im2, 30, 8, 0.2, 2);
 
 % 1 for high frequences enhancement
 % 2 for low frequences enhancement

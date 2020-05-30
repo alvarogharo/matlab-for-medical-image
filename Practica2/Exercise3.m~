@@ -1,8 +1,0 @@
-im = imread("./images/mr1.png");
-
-transformedIm = transform(im, [10,10], 90, 1.5);
-
-
-lol = interpolate(im, );
-
-imshow(lol);
