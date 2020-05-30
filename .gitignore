@@ -1,2 +1,3 @@
-/Practica2/corr/.idea
-/Practica2/corr/venv
+/Practica2/codigo/calculo_correlacion/.idea
+/Practica2/codigo/calculo_correlacion/venv
+*.pyc
