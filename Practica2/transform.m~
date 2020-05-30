@@ -1,0 +1,6 @@
+function uotputImg = transform(inputImg, translation, rotationAngle, scale)
+    im = imtransalate(inputImg, transalation);
+    im = imrotate(im, rotationAngle);
+    im = 
+end
+

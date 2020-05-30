@@ -1,0 +1,6 @@
+function [outputArg1,outputArg2] = interpolate(im, interpolationMesh)
+    size
+    [x y] = meshgrid(1:256);
+    interp2(x,y,double(I),xi,yi,'linear')
+end
+
