@@ -1,0 +1,39 @@
+function mr1res=rigida
+% Algoritmo de registro completo con optimización y sacando una métrica
+% entre ambas imágenes
+
+% Se carga un corte de la mr1.nii
+mr1=load_untouch_nii('./images/mr1.nii');
+size(:,:,199))
+mr1=mat2gray(mr1.img(:,:,199));
+
+% Se hace una rotación, una traslación y un escalado por defecto
+mr1rot=imrotate(mr1,30,'bilinear','crop');
+mr1tra=imtranslate(mr1rot,[20, -10],'FillValues',0);
+mr1scl=imresize(mr1tra,0.5,'box');
+
+% Se crea la optimización de gradiente descendiente y metrica de
+% información mutua
+optimizacion=registration.optimizer.RegularStepGradientDescent();
+metric=registration.metric.MattesMutualInformation();
+
+% Se crea el kernel que realizará la transformación idónea
+trans=imregtform(mr1scl,mr1,'similarity',optimizacion,metric);
+
+% Se realiza la transfomación a la imágen mal registrada
+mr1res=imwarp(mr1scl,trans,'OutputView',imref2d(size(mr1)));
+
+% Se muestra por pantalla el resutado
+figure(1)
+subplot(1,3,1)
+imshow(mr1),title('Original')
+subplot(1,3,2)
+imshow(mr1scl),title('Mal Registrada')
+subplot(1,3,3)
+imshow(mr1res),title('Resultado Registro')
+subplot(1,3,3)
+set(1, 'Position', get(0,'Screensize')); % Maximize figure.
+
+
+
+end
