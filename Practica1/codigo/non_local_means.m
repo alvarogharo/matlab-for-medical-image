@@ -1,93 +1,76 @@
-function [output] = non_local_means(input,t,f,h)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- %
- %  input: image to be filtered
- %  t: radio of search window
- %  f: radio of similarity window
- %  h: degree of filtering
- %
- %  Author: Jose Vicente Manjon Herrera & Antoni Buades
- %  Date: 09-03-2006
- %
- %  Implementation of the Non local filter proposed for A. Buades, B. Coll and J.M. Morel in
- %  "A non-local algorithm for image denoising"
- %
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- % Size of the image
- [m n]=size(input);
- 
- 
- % Memory for the output
- Output=zeros(m,n);
- % Replicate the boundaries of the input image
- input2 = padarray(input,[f f],'symmetric');
- 
- % Used kernel
- kernel = make_kernel(f);
- kernel = kernel / sum(sum(kernel));
- 
- h=h*h;
- 
- for i=1:m
-    for j=1:n
-                 
-         i1 = i+ f;
-         j1 = j+ f;
+function [processed_im] = non_local_means(input, window_size,sigma)
 
-         W1= input2(i1-f:i1+f , j1-f:j1+f);
+    kernel = radial_ponderation(window_size);
+    kernel = kernel / sum(sum(kernel));
+    
+    [height width]=size(input);
+    sigma = sigma*sigma;
+    processed_im = zeros(height,width);
+    
+    
+    input2 = padarray(input,[window_size window_size],'symmetric');
 
-         wmax=0; 
-         average=0;
-         sweight=0;
+    for i=1:height
+        for j=1:width
 
-         rmin = max(i1-t,f+1);
-         rmax = min(i1+t,m+f);
-         smin = max(j1-t,f+1);
-         smax = min(j1+t,n+f);
-
-         for r=rmin:1:rmax
-             for s=smin:1:smax
-
-                    if(r==i1 && s==j1) 
-                        continue;
-                    end;
-
-                    W2= input2(r-f:r+f , s-f:s+f);                
-
-                    d = sum(sum(kernel.*(W1-W2).*(W1-W2)));
-
-                    w=exp(-d/h);                 
-
-                    if w>wmax                
-                        wmax=w;                   
-                    end
-
-                    sweight = sweight + w;
-                    average = average + w*input2(r,s);                                  
-             end 
-         end
+             i_window = i + window_size;
+             j_window = j + window_size;
+             current_patch= input2(i_window-window_size:i_window+window_size , j_window-window_size:j_window+window_size);
              
-        average = average + wmax*input2(i1,j1);
-        sweight = sweight + wmax;
-                   
-        if sweight > 0
-            output(i,j) = average / sweight;
-        else
-            output(i,j) = input(i,j);
-        end                
+             max_weight=0; 
+             average=0;
+             accumulated_weight=0;
+             [height_min, height_max, width_min, width_max] = get_window(i_window, j_window, height, width, window_size);
+
+             for r=height_min:1:height_max
+                 for s=width_min:1:width_max
+
+                        if(r==i_window && s==j_window) 
+                            continue;
+                        end
+
+                        matching_patch= input2(r-window_size:r+window_size , s-window_size:s+window_size);                
+                        ssd = sum(sum(kernel.*(current_patch-matching_patch).*(current_patch-matching_patch)));
+                        current_weight = exp(-ssd/sigma);                 
+
+                        if current_weight>max_weight                
+                            max_weight=current_weight;                   
+                        end
+
+                        accumulated_weight = accumulated_weight + current_weight;
+                        average = average + current_weight*input2(r,s);                                  
+                 end 
+             end
+
+            average = average + max_weight*input2(i_window,j_window);
+            accumulated_weight = accumulated_weight + max_weight;
+
+            if accumulated_weight > 0
+                processed_im(i,j) = average / accumulated_weight;
+            else
+                processed_im(i,j) = input(i,j);
+            end                
+        end
     end
- end
+    
+function [height_min, height_max, width_min, width_max] = get_window(i, j, height, width, window_size)             
+    height_min = max(i-window_size,window_size+1);
+    height_max = min(i+window_size,height+window_size);
+    width_min = max(j-window_size,window_size+1);
+    width_max = min(j+window_size,width+window_size);
+    
  
-function [kernel] = make_kernel(f)              
- 
-kernel=zeros(2*f+1,2*f+1);   
-for d=1:f    
-  value= 1 / (2*d+1)^2 ;    
-  for i=-d:d
-      for j=-d:d
-        kernel(f+1-i,f+1-j)= kernel(f+1-i,f+1-j) + value ;
+function [kernel] = radial_ponderation(window_size)              
+    kernel=zeros(2*window_size+1);   
+    for i=1:window_size    
+      value= 1 / (2*i+1)^2 ;    
+      for j=-i:i
+          for w=-i:i
+            kernel(window_size+1-w,window_size+1-w)= kernel(window_size+1-w,window_size+1-w) + value ;
+          end
       end
-  end
-end
-kernel = kernel ./ f;
+    end
+    kernel = kernel ./ window_size;
+    
+    
 

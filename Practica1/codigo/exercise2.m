@@ -3,7 +3,7 @@ im1 = rgb2gray(im1);
 im1 = im2double(im1);
 
 %% 
-NLM = non_local_means(im1, 2,2,10);
+NLM = non_local_means(im1, 2,10);
 gaussian = imgaussfilt(im1,2);
 ansio = dif_aniso(im1, 10, 8, 0.2, 1);
 
